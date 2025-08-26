@@ -2,8 +2,8 @@
 // 위젯 관련 API들만 담당
 
 const API_CONFIG = {
-    BASE_URL: 'http://localhost:3000', // 직접 Langfuse 서버 지정
-    PROJECT_ID: import.meta.env.VITE_LANGFUSE_PROJECT_ID || 'cmekn4eda0006r407r92i5nam',
+    BASE_URL: '', // 직접 Langfuse 서버 지정
+    PROJECT_ID: import.meta.env.VITE_LANGFUSE_PROJECT_ID,
   };
   
   class WidgetAPI {

@@ -17,9 +17,8 @@ import PromptsNew from './Pages/Prompts/PromptsNew';
 // import JudgePage from './pages/Evaluation/Judge/JudgePage';
 
 import Dashboards from './Pages/DashBoard/Dashboards';
-// import Dashboards from './pages/Dashboards/Dashboards';
-// import DashboardNew from './pages/Dashboards/DashboardNew';
-// import DashboardDetail from './pages/Dashboards/DashboardDetail';
+import DashboardDetail from './Pages/DashBoard/DashboardDetail';
+import DashboardNew from './Pages/DashBoard/DashboardDetail';
 // import WidgetNew from './pages/Dashboards/WidgetNew';
 
 import SettingsPage from './Pages/Settings/SettingsPage';
@@ -58,10 +57,12 @@ export default function App() {
         <Route path="evaluation/:id/edit" element={<Navigate to="/scores/:id/edit" replace />} /> */}
 
         <Route path="dashboards" element={<Dashboards />} />
-        {/* <Route path="dashboards" element={<Dashboards />} />
+        <Route path="dashboards/:dashboardId" element={<DashboardDetail />} />
         <Route path="dashboards/new" element={<DashboardNew />} />
+        {/* <Route path="dashboards" element={<Dashboards />} />
+        
         <Route path="dashboards/widgets/new" element={<WidgetNew />} />
-        <Route path="dashboards/:dashboardId" element={<DashboardDetail />} /> */}
+         */}
 
         <Route path="settings" element={<SettingsPage/>}>
           {/* <Route index element={<General/>}/>

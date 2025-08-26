@@ -1,154 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboardAPI, utils } from './services/index.js';
-import { Bot, MoreHorizontal } from 'lucide-react';
+import { Bot, MoreHorizontal, Plus } from 'lucide-react';
 import styles from './Dashboards.module.css';
-
-// 편집 다이얼로그 컴포넌트
-function EditDashboardDialog({ 
-  open, 
-  onClose, 
-  dashboard, 
-  onSave 
-}) {
-  const [name, setName] = useState(dashboard?.name || '');
-  const [description, setDescription] = useState(dashboard?.description || '');
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (dashboard) {
-      setName(dashboard.name || '');
-      setDescription(dashboard.description || '');
-    }
-  }, [dashboard]);
-
-  if (!open) return null;
-
-  const handleSave = async () => {
-    if (!name.trim()) {
-      alert('Dashboard name is required');
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const result = dashboard?.id 
-        ? await onSave('update', dashboard.id, name, description)
-        : await onSave('create', null, name, description);
-        
-      if (result.success) {
-        onClose();
-      } else {
-        alert(result.error || 'Failed to save dashboard');
-      }
-    } catch (error) {
-      console.error('Save error:', error);
-      alert('Failed to save dashboard');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.7)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000
-    }}>
-      <div style={{
-        backgroundColor: '#0f172a',
-        border: '1px solid #1e293b',
-        padding: '30px',
-        borderRadius: '8px',
-        width: '500px',
-        maxWidth: '90vw',
-        color: '#f8fafc'
-      }}>
-        <h2 style={{ marginBottom: '20px', color: '#f1f5f9' }}>
-          {dashboard?.id ? 'Edit Dashboard' : 'Create Dashboard'}
-        </h2>
-        
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', color: '#cbd5e1' }}>Dashboard Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="New Dashboard"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid #1e293b',
-              borderRadius: '4px',
-              backgroundColor: '#020817',
-              color: '#f8fafc'
-            }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', color: '#cbd5e1' }}>Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe the purpose of this dashboard. Optional, but very helpful."
-            rows={4}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid #1e293b',
-              borderRadius: '4px',
-              backgroundColor: '#020817',
-              color: '#f8fafc',
-              resize: 'vertical'
-            }}
-          />
-        </div>
-
-        <div style={{ textAlign: 'right' }}>
-          <button
-            onClick={onClose}
-            disabled={loading}
-            style={{
-              marginRight: '10px',
-              padding: '8px 16px',
-              border: '1px solid #1e293b',
-              backgroundColor: '#334155',
-              color: '#f8fafc',
-              borderRadius: '4px',
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: loading ? '#64748b' : '#f8fafc',
-              color: loading ? '#f8fafc' : '#020817',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
-          >
-            {loading ? 'Saving...' : (dashboard?.id ? 'Save Changes' : 'Create')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // 액션 드롭다운 컴포넌트
 function ActionsDropdown({ dashboard, onEdit, onClone, onDelete, disabled = false }) {
@@ -249,11 +103,10 @@ function ActionsDropdown({ dashboard, onEdit, onClone, onDelete, disabled = fals
   );
 }
 
-// 메인 DashboardTable 컴포넌트 (헤더 제거된 버전)
+// 메인 DashboardTable 컴포넌트 (모달 제거된 버전)
 function DashboardListPage() {
   const [dashboards, setDashboards] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: 'updatedAt', direction: 'desc' });
-  const [editingDashboard, setEditingDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -312,40 +165,10 @@ function DashboardListPage() {
     return 0;
   });
 
-  // 액션 핸들러들
+  // 편집 핸들러 (상세 페이지로 라우팅)
   const handleEdit = (dashboard) => {
-    setEditingDashboard(dashboard);
-  };
-
-  const handleSave = async (action, dashboardId, name, description) => {
-    try {
-      let result;
-      
-      if (action === 'create') {
-        console.log('새 대시보드 생성:', { name, description });
-        result = await dashboardAPI.createDashboard(name, description);
-        
-        if (result) {
-          console.log('대시보드 생성 성공:', result);
-          await loadDashboards();
-          return { success: true };
-        }
-      } else if (action === 'update') {
-        console.log('대시보드 수정:', { dashboardId, name, description });
-        result = await dashboardAPI.updateDashboard(dashboardId, name, description);
-        
-        if (result) {
-          console.log('대시보드 수정 성공:', result);
-          await loadDashboards();
-          return { success: true };
-        }
-      }
-      
-      return { success: false, error: 'Unknown error occurred' };
-    } catch (error) {
-      console.error('대시보드 저장 실패:', error);
-      return { success: false, error: error.message };
-    }
+    // 편집은 상세 페이지에서 처리하도록 라우팅
+    window.location.href = `/dashboards/${dashboard.id}`;
   };
 
   const handleClone = async (dashboard) => {
@@ -353,10 +176,12 @@ function DashboardListPage() {
       console.log('대시보드 복제:', dashboard.id);
       const result = await dashboardAPI.cloneDashboard(dashboard.id);
       
-      if (result) {
+      if (result.success) {
         console.log('대시보드 복제 성공:', result);
         alert('Dashboard cloned successfully!');
         await loadDashboards();
+      } else {
+        alert(`Failed to clone dashboard: ${result.error}`);
       }
     } catch (error) {
       console.error('대시보드 복제 실패:', error);
@@ -373,19 +198,17 @@ function DashboardListPage() {
       console.log('대시보드 삭제:', dashboard.id);
       const result = await dashboardAPI.deleteDashboard(dashboard.id);
       
-      if (result) {
+      if (result.success) {
         console.log('대시보드 삭제 성공');
         alert('Dashboard deleted successfully!');
         await loadDashboards();
+      } else {
+        alert(`Failed to delete dashboard: ${result.error}`);
       }
     } catch (error) {
       console.error('대시보드 삭제 실패:', error);
       alert(`Failed to delete dashboard: ${error.message}`);
     }
-  };
-
-  const handleCreateNew = () => {
-    setEditingDashboard({});
   };
 
   if (loading) {
@@ -420,18 +243,43 @@ function DashboardListPage() {
 
   return (
     <div>
+      {/* 헤더에 New Dashboard 버튼 추가 */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '24px' 
+      }}>
+        <h1 style={{ margin: 0, color: '#f1f5f9', fontSize: '24px', fontWeight: '600' }}>
+          Dashboards
+        </h1>
+        <Link 
+          to="/dashboards/new"
+          className={styles.primaryButton}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            textDecoration: 'none'
+          }}
+        >
+          <Plus size={16} />
+          New dashboard
+        </Link>
+      </div>
+
       {/* 테이블 */}
       {dashboards.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '50px', color: '#64748b' }}>
           📋 아직 생성된 대시보드가 없습니다.
           <br />
           <br />
-          <button
-            onClick={handleCreateNew}
+          <Link
+            to="/dashboards/new"
             className={styles.primaryButton}
           >
             첫 번째 대시보드 생성하기
-          </button>
+          </Link>
         </div>
       ) : (
         <div className={styles.tableContainer}>
@@ -501,14 +349,6 @@ function DashboardListPage() {
           </table>
         </div>
       )}
-
-      {/* 편집 다이얼로그 */}
-      <EditDashboardDialog
-        open={!!editingDashboard}
-        onClose={() => setEditingDashboard(null)}
-        dashboard={editingDashboard}
-        onSave={handleSave}
-      />
     </div>
   );
 }
