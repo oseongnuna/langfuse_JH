@@ -58,8 +58,7 @@ export default function App() {
         <Route path="dashboards" element={<Dashboards />} />
         <Route path="dashboards/new" element={<DashboardNew />} />
         <Route path="dashboards/:dashboardId" element={<DashboardDetail />} />
-        {/* <Route path="dashboards" element={<Dashboards />} />
-        
+        {/* 
         <Route path="dashboards/widgets/new" element={<WidgetNew />} />
          */}
 
