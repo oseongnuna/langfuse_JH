@@ -3,7 +3,7 @@
 
 const API_CONFIG = {
     BASE_URL: '', // 직접 Langfuse 서버 지정
-    PROJECT_ID: import.meta.env.VITE_LANGFUSE_PROJECT_ID || 'cmekn4eda0006r407r92i5nam',
+    PROJECT_ID: import.meta.env.VITE_LANGFUSE_PROJECT_ID,
   };
   
   class DashboardAPI {
@@ -361,7 +361,7 @@ const API_CONFIG = {
   
     // 프로젝트 ID 가져오기
     getCurrentProjectId() {
-      return import.meta.env.VITE_LANGFUSE_PROJECT_ID || 'cmekn4eda0006r407r92i5nam';
+      return import.meta.env.VITE_LANGFUSE_PROJECT_ID;
     }
   };
   

@@ -420,12 +420,16 @@ const useDashboardDetail = (dashboardId) => {
         setLoading(true);
         
         // 더미 대시보드 찾기
-        const foundDashboard = DUMMY_DASHBOARDS.find(d => d.id === dashboardId);
-        if (!foundDashboard) {
-          throw new Error('Dashboard not found');
-        }
-        
-        setDashboard(foundDashboard);
+        const basicDashboard = {
+            id: dashboardId,
+            name: 'New Dashboard',
+            description: 'User created dashboard',
+            owner: 'PROJECT',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          
+          setDashboard(basicDashboard);
 
         // 위젯 데이터 로딩 시뮬레이션
         const mockWidgetData = {};

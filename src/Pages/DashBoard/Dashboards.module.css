@@ -163,3 +163,102 @@
     flex-grow: 1;
     overflow: hidden;
   }
+
+/* Dashboards.module.css에 추가할 액션 드롭다운 스타일들 */
+
+/* 정렬 가능한 헤더 */
+.sortableHeader {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.sortableHeader:hover {
+  color: #f8fafc;
+}
+
+/* 정렬 아이콘 */
+.sortIcon {
+  color: #64748b;
+  transition: color 0.2s ease;
+}
+
+.sortIconActive {
+  color: #f8fafc;
+}
+
+/* 액션 드롭다운 컨테이너 */
+.actionDropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* 액션 버튼 (기존 iconButton 스타일과 일치) */
+.actionButton {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.actionButton:hover {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+/* 드롭다운 메뉴 (다크 테마) */
+.dropdownMenu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1000;
+  min-width: 120px;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+/* 드롭다운 아이템 */
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 13px;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dropdownItem:hover {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+/* 삭제 아이템 (빨간색, 다크 테마용) */
+.dropdownItem.deleteItem {
+  color: #f87171;
+}
+
+.dropdownItem.deleteItem:hover {
+  background-color: #450a0a;
+  color: #fca5a5;
+}

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
-import FormPageLayout from '../../components/Layouts/FormPageLayout';
-import FormGroup from '../../components/Form/FormGroup';
+import FormPageLayout from '../../components/Layouts/FormPageLayout.jsx';
+import FormGroup from '../../components/Form/FormGroup.jsx';
 import { dashboardAPI } from './services/index.js';
 
 const DashboardNew = () => {
