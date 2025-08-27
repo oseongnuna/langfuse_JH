@@ -28,8 +28,13 @@ const CalendarMonth = React.memo(
       days.push(startOfMonth.date(i));
     }
 
-    const isDayInRange = (day) =>
-      day && day.isAfter(startDate.subtract(1, "day")) && day.isBefore(endDate);
+    const isDayInRange = (day) => {
+      if (!day) return false;
+      const dayStart = day.startOf('day');
+      const rangeStart = startDate.startOf('day');
+      const rangeEnd = endDate.startOf('day');
+      return dayStart.isAfter(rangeStart.subtract(1, 'day')) && dayStart.isBefore(rangeEnd.add(1, 'day'));
+    };
     const isRangeStart = (day) => day && day.isSame(startDate, "day");
     const isRangeEnd = (day) => day && day.isSame(endDate, "day");
 
@@ -72,6 +77,7 @@ const DateRangePopup = ({
   endDate,
   setStartDate,
   setEndDate,
+  setBothDates,
   onClose,
   triggerRef,
 }) => {
@@ -83,16 +89,39 @@ const DateRangePopup = ({
   // 날짜 클릭 핸들러
   const handleDateClick = (clickedDate) => {
     const clickedDay = dayjs(clickedDate);
-    const currentStart = dayjs(startDate);
-    const currentEnd = dayjs(endDate);
-  
-    if (clickedDay.isBefore(currentStart)) {
-      // 시작일보다 이전 → 시작일 당기기
+    const currentStart = dayjs(startDate).startOf('day');
+    const currentEnd = dayjs(endDate).startOf('day');
+    const clickedDayStart = clickedDay.startOf('day');
+    
+    // 시작일과 종료일이 같은 날인지 확인 (단일 날짜 범위)
+    const isSingleDay = currentStart.isSame(currentEnd);
+    
+    if (isSingleDay && clickedDayStart.isSame(currentStart)) {
+      // 이미 단일 날짜로 선택된 상태에서 같은 날 클릭 → 아무것도 안함
+      return;
+    }
+    
+    if (clickedDayStart.isSame(currentStart) || clickedDayStart.isSame(currentEnd)) {
+      // 시작일 또는 종료일 클릭 → 단일 날짜로 설정
+      const startWithTime = clickedDay.hour(0).minute(0).second(0);
+      const endWithTime = clickedDay.hour(23).minute(59).second(59);
+   
+      if (setBothDates) {
+        setBothDates(startWithTime.toDate(), endWithTime.toDate());
+      } else {
+        setStartDate(startWithTime.toDate());
+        setEndDate(endWithTime.toDate());
+      }
+      
+      setStartTime({ hh: "12", mm: "00", ss: "00", ampm: "AM" });
+      setEndTime({ hh: "11", mm: "59", ss: "59", ampm: "PM" });
+    } else if (clickedDayStart.isBefore(currentStart)) {
+      // 시작일보다 이전
       const startWithTime = clickedDay.hour(0).minute(0).second(0);
       setStartDate(startWithTime.toDate());
       setStartTime({ hh: "12", mm: "00", ss: "00", ampm: "AM" });
     } else {
-      // 시작일 이후 (사이든 이후든) → 종료일 설정
+      // 시작일 이후 → 종료일 설정  
       const endWithTime = clickedDay.hour(23).minute(59).second(59);
       setEndDate(endWithTime.toDate());
       setEndTime({ hh: "11", mm: "59", ss: "59", ampm: "PM" });
@@ -174,39 +203,67 @@ const DateRangePopup = ({
 
   const handleAmPmChange = (type, value) => {
     const setter = type === "start" ? setStartTime : setEndTime;
-    setter((prev) => ({ ...prev, ampm: value }));
+    setter((prev) => {
+      const newTime = { ...prev, ampm: value };
+      
+      // AM/PM 변경 시에도 날짜 업데이트
+      const updateDate = (originalDate, time) => {
+        let hour = parseInt(time.hh, 10) || 0;
+        if (time.ampm === "PM" && hour < 12) hour += 12;
+        if (time.ampm === "AM" && hour === 12) hour = 0;
+        return dayjs(originalDate)
+          .hour(hour)
+          .minute(parseInt(time.mm, 10) || 0)
+          .second(parseInt(time.ss, 10) || 0)
+          .toDate();
+      };
+      
+      if (type === "start") {
+        setStartDate(updateDate(startDate, newTime));
+      } else {
+        setEndDate(updateDate(endDate, newTime));
+      }
+      
+      return newTime;
+    });
   };
 
   const handleTimeBlur = (type, part, value) => {
     const numericValue = parseInt(value, 10);
     let finalValue = isNaN(numericValue) ? "00" : value;
-
+  
     if (numericValue < 10 && value.length < 2) {
       finalValue = `0${numericValue}`;
     }
     if (value === "") {
       finalValue = "00";
     }
-
+  
     const setter = type === "start" ? setStartTime : setEndTime;
-    setter((prev) => ({ ...prev, [part]: finalValue }));
+    setter((prev) => {
+      const newTime = { ...prev, [part]: finalValue };
+      
+      // 시간 변경 시 날짜도 함께 업데이트
+      const updateDate = (originalDate, time) => {
+        let hour = parseInt(time.hh, 10) || 0;
+        if (time.ampm === "PM" && hour < 12) hour += 12;
+        if (time.ampm === "AM" && hour === 12) hour = 0;
+        return dayjs(originalDate)
+          .hour(hour)
+          .minute(parseInt(time.mm, 10) || 0)
+          .second(parseInt(time.ss, 10) || 0)
+          .toDate();
+      };
+      
+      if (type === "start") {
+        setStartDate(updateDate(startDate, newTime));
+      } else {
+        setEndDate(updateDate(endDate, newTime));
+      }
+      
+      return newTime;
+    });
   };
-
-  useEffect(() => {
-    const updateDate = (originalDate, time) => {
-      let hour = parseInt(time.hh, 10) || 0;
-      if (time.ampm === "PM" && hour < 12) hour += 12;
-      if (time.ampm === "AM" && hour === 12) hour = 0;
-      return dayjs(originalDate)
-        .hour(hour)
-        .minute(parseInt(time.mm, 10) || 0)
-        .second(parseInt(time.ss, 10) || 0)
-        .toDate();
-    };
-    setStartDate(updateDate(startDate, startTime));
-    setEndDate(updateDate(endDate, endTime));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startTime, endTime]);
 
   const timezone = useMemo(() => {
     const offset = dayjs().format("Z");

@@ -1,0 +1,145 @@
+/* src/pages/Dashboards/AddWidgetModal.module.css */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
+  
+  .modalContent {
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 80vh;
+    color: #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    outline: none; /* 포커스 아웃라인 제거 */
+  }
+  
+  .modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #334155;
+    flex-shrink: 0;
+  }
+  
+  .modalTitle {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    transition: background-color 0.2s ease;
+  }
+  
+  .closeButton:hover {
+    background-color: #334155;
+  }
+  
+  .closeButton:focus {
+    background-color: #334155;
+    outline: 2px solid #f8fafc;
+    outline-offset: 2px;
+  }
+  
+  .modalBody {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  
+  .emptyState {
+    text-align: center;
+    padding: 48px;
+    color: #94a3b8;
+  }
+  
+  .modalFooter {
+    padding: 16px 24px;
+    border-top: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  
+  .footerActions {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .primaryButton,
+  .secondaryButton {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .primaryButton {
+    background-color: #f8fafc;
+    color: #1e293b;
+    border: none;
+  }
+  
+  .primaryButton:hover {
+    background-color: #e2e8f0;
+  }
+  
+  .primaryButton:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+  
+  .primaryButton:disabled {
+    background-color: #475569;
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+  
+  .primaryButton:disabled:hover {
+    background-color: #475569;
+  }
+  
+  .secondaryButton {
+    background-color: #334155;
+    border: 1px solid #4b5563;
+    color: #f1f5f9;
+  }
+  
+  .secondaryButton:hover {
+    background-color: #4b5563;
+  }
+  
+  .secondaryButton:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }

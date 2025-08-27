@@ -13,6 +13,7 @@ const DateRangePicker = ({
   endDate, 
   setStartDate, 
   setEndDate, 
+  setBothDates,
   onPresetChange 
 }) => {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -106,11 +107,15 @@ const DateRangePicker = ({
             endDate={endDate}
             setStartDate={(date) => {
               setStartDate(date);
-              setDateRangePreset('custom'); // 달력 선택 시 Custom으로 변경
+              setDateRangePreset('custom');
             }}
             setEndDate={(date) => {
               setEndDate(date);
-              setDateRangePreset('custom'); // 달력 선택 시 Custom으로 변경
+              setDateRangePreset('custom');
+            }}
+            setBothDates={(startDate, endDate) => {
+              setBothDates(startDate, endDate);
+              setDateRangePreset('custom');
             }}
             onClose={() => setIsPickerOpen(false)}
             triggerRef={calendarButtonRef}
