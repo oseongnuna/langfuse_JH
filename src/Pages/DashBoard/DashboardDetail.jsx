@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Info, Plus } from 'lucide-react';
 import DashboardFilterControls from './components/DashboardFilterControls';
+import AddWidgetModal from './AddWidgetModal'; // ← 새로 추가
 import styles from './DashboardDetail.module.css';
 import { dashboardAPI } from './services/dashboardAPI';
 
@@ -103,6 +104,19 @@ const DashboardDetail = () => {
     setAddWidgetModalOpen(true);
   };
 
+  // ← 새로 추가: 위젯 추가 완료 핸들러
+  const handleWidgetAdded = (widgetId) => {
+    console.log('Widget added:', widgetId);
+    // TODO: 실제 위젯을 대시보드에 추가하는 API 호출
+    // 임시로 widgets 배열에 추가하는 예시:
+    const newWidget = {
+      id: widgetId,
+      name: `Widget ${widgetId}`,
+      type: 'chart'
+    };
+    setWidgets(prev => [...prev, newWidget]);
+  };
+
   // 로딩 상태 (기존 로직 유지)
   if (loading) {
     return (
@@ -188,29 +202,10 @@ const DashboardDetail = () => {
         )}
       </div>
 
-      {/* Main Content Area - 기존 로직 유지 */}
+      {/* Main Content Area */}
       <div className={styles.mainContent}>
-        {widgets.length === 0 ? (
-          // 빈 대시보드 상태
-          <div className={styles.emptyState}>
-            <div className={styles.emptyStateContent}>
-              <div className={styles.emptyIcon}>
-                <Plus size={48} />
-              </div>
-              <h2 className={styles.emptyTitle}>No widgets yet</h2>
-              <p className={styles.emptyDescription}>
-                Start building your dashboard by adding your first widget
-              </p>
-              <button 
-                className={styles.emptyStateButton}
-                onClick={handleAddWidget}
-              >
-                <Plus size={16} /> Add Widget
-              </button>
-            </div>
-          </div>
-        ) : (
-          // 위젯이 있는 경우 (나중에 구현)
+        {/* 위젯이 있는 경우에만 표시 */}
+        {widgets.length > 0 && (
           <div className={styles.widgetGrid}>
             {widgets.map(widget => (
               <div key={widget.id} className={styles.widget}>
@@ -222,49 +217,12 @@ const DashboardDetail = () => {
         )}
       </div>
 
-      {/* Add Widget Modal (기존 로직 유지) */}
+      {/* AddWidgetModal - 새로운 컴포넌트 사용 */}
       {isAddWidgetModalOpen && (
-        <div className={styles.modalOverlay} onClick={() => setAddWidgetModalOpen(false)}>
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3>Add Widget</h3>
-              <button 
-                className={styles.modalCloseButton}
-                onClick={() => setAddWidgetModalOpen(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className={styles.modalBody}>
-              <p>AddWidgetModal will be implemented here</p>
-              <p>This modal will allow you to:</p>
-              <ul>
-                <li>Choose widget type</li>
-                <li>Configure data source</li>
-                <li>Set chart type</li>
-                <li>Preview and add to dashboard</li>
-              </ul>
-            </div>
-            <div className={styles.modalFooter}>
-              <button 
-                className={styles.modalCancelButton}
-                onClick={() => setAddWidgetModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <button 
-                className={styles.modalAddButton}
-                onClick={() => {
-                  // TODO: 실제 위젯 추가 로직
-                  console.log('Widget will be added');
-                  setAddWidgetModalOpen(false);
-                }}
-              >
-                Add Widget
-              </button>
-            </div>
-          </div>
-        </div>
+        <AddWidgetModal 
+          onClose={() => setAddWidgetModalOpen(false)}
+          onAddWidget={handleWidgetAdded}
+        />
       )}
     </div>
   );
