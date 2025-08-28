@@ -55,9 +55,11 @@ export default function App() {
         <Route path="evaluation/:id" element={<Navigate to="/scores/:id" replace />} />
         <Route path="evaluation/:id/edit" element={<Navigate to="/scores/:id/edit" replace />} /> */}
 
+        {/* Dashboards */}
         <Route path="dashboards" element={<Dashboards />} />
         <Route path="dashboards/new" element={<DashboardNew />} />
         <Route path="dashboards/:dashboardId" element={<DashboardDetail />} />
+        
         {/* 
         <Route path="dashboards/widgets/new" element={<WidgetNew />} />
          */}

@@ -1,160 +1,211 @@
-// src/pages/Dashboards/DashboardDetail.jsx
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Info, Plus, Download } from "lucide-react";
+import DashboardFilterControls from "./components/DashboardFilterControls";
+import WidgetCard from "./components/WidgetCard";
+import AddWidgetModal from "./AddWidgetModal";
+import styles from "./DashboardDetail.module.css";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Info, Plus } from 'lucide-react';
-import DashboardFilterControls from './components/DashboardFilterControls';
-import AddWidgetModal from './AddWidgetModal'; // ← 새로 추가
-import styles from './DashboardDetail.module.css';
-import { dashboardAPI } from './services/dashboardAPI';
+// useDashboardDetail 훅 import 추가!
+import { useDashboardDetail } from "./hooks/useDashboardDetail";
+
+// 차트 컴포넌트들 import
+import TotalMetric from "./components/charts/TotalMetric";
+import BaseTimeSeriesChart from "./components/charts/BaseTimeSeriesChart";
+import TracesBarListChart from "./components/charts/TracesBarListChart";
+import ModelCostTable from "./components/charts/ModelCostTable";
 
 const DashboardDetail = () => {
   const { dashboardId } = useParams();
   const navigate = useNavigate();
-  
-  // 상태 관리 (기존 코드 유지)
-  const [dashboard, setDashboard] = useState(null);
-  const [widgets, setWidgets] = useState([]); // 빈 배열로 시작
-  const [loading, setLoading] = useState(true);
-  
+
+  // useDashboardDetail 훅 사용
+  const {
+    dashboard,
+    widgetData,
+    loading,
+    error,
+    dateRange,
+    setDateRange,
+    reload,
+    clone,
+    templateInfo,
+    loadingStats,
+  } = useDashboardDetail(dashboardId);
+
   // UI 상태
   const [isAddWidgetModalOpen, setAddWidgetModalOpen] = useState(false);
-  
-  // 날짜 범위 상태 (기존 DateRangePicker와 동일)
-  const [startDate, setStartDate] = useState(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-  const [endDate, setEndDate] = useState(new Date());
 
-  // 대시보드 정보 로딩 (기존 로직 유지)
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      if (!dashboardId) return;
-      
-      setLoading(true);
-      try {
-        const response = await dashboardAPI.getDashboard(dashboardId);
-        if (response.success) {
-          setDashboard(response.data);
-          
-          // 대시보드에 위젯이 있다면 로딩
-          if (response.data.widgets) {
-            setWidgets(response.data.widgets);
-          }
-        } else {
-          console.error('대시보드 로딩 실패:', response.error);
-          // 새 대시보드인 경우 기본 정보 설정
-          const dashboardName = dashboardId === 'new' ? 'New Dashboard3' : dashboardId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          
-          setDashboard({
-            id: dashboardId,
-            name: dashboardName,
-            description: '',
-            widgets: []
-          });
-        }
-      } catch (err) {
-        console.error('대시보드 로딩 중 오류:', err);
-        // 기본 대시보드 정보 설정
-        const dashboardName = dashboardId === 'new' ? 'New Dashboard3' : dashboardId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        
-        setDashboard({
-          id: dashboardId,
-          name: dashboardName,
-          description: '',
-          widgets: []
-        });
-      } finally {
-        setLoading(false);
+  // 차트 컴포넌트 매핑
+  const getChartComponent = (widget, data) => {
+    // 로딩 상태
+    if (!data || data.isLoading) {
+      return (
+        <div
+          style={{
+            padding: "40px",
+            textAlign: "center",
+            color: "#6b7280",
+            fontSize: "0.875rem",
+          }}
+        >
+          Loading...
+        </div>
+      );
+    }
+
+    // 에러 상태
+    if (data.error) {
+      return (
+        <div
+          style={{
+            padding: "40px",
+            textAlign: "center",
+            color: "#ef4444",
+            fontSize: "0.875rem",
+          }}
+        >
+          Error: {data.error}
+        </div>
+      );
+    }
+
+    // 실제 API가 적용된 컴포넌트만 렌더링
+    const REAL_API_COMPONENTS = ["TotalMetric", "BaseTimeSeriesChart", "TracesBarListChart"];
+
+    if (REAL_API_COMPONENTS.includes(widget.component)) {
+      // 실제 컴포넌트 렌더링
+      switch (widget.component) {
+        case "TotalMetric":
+          return <TotalMetric data={data} />;
+        case "BaseTimeSeriesChart":
+          return <BaseTimeSeriesChart data={data.chartData || []} />;
+          case "TracesBarListChart":
+  return <TracesBarListChart data={data.chartData || []} />;
+        default:
+          return null;
       }
-    };
-
-    fetchDashboard();
-  }, [dashboardId]);
-
-  // 새로고침 핸들러 - DashboardFilterControls의 RefreshButton에서 호출
-  const handleRefresh = async () => {
-    console.log('Refreshing dashboard with date range:', { startDate, endDate });
-    
-    try {
-      setLoading(true);
-      
-      // 실제 API 호출할 때 현재 날짜 범위를 함께 전달
-      const response = await dashboardAPI.getDashboard(dashboardId, { startDate, endDate });
-      if (response.success && response.data.widgets) {
-        setWidgets(response.data.widgets);
-      }
-      
-    } catch (error) {
-      console.error('새로고침 중 오류:', error);
-      // 임시로 페이지 새로고침 (fallback)
-      window.location.reload();
-    } finally {
-      setLoading(false);
+    } else {
+      // 목업 데이터 위젯들은 플레이스홀더만 표시
+      return (
+        <div
+          style={{
+            padding: "20px",
+            textAlign: "center",
+            color: "#6b7280",
+            fontSize: "0.875rem",
+          }}
+        >
+          <div style={{ marginBottom: "8px", fontWeight: "bold" }}>
+            {widget.component}
+          </div>
+          <div style={{ fontSize: "0.75rem", color: "#9ca3af" }}>
+            Mock Data ({data.apiStatus})
+          </div>
+          <div
+            style={{
+              marginTop: "8px",
+              fontSize: "0.75rem",
+              fontFamily: "monospace",
+            }}
+          >
+            Data items:{" "}
+            {Array.isArray(data.chartData) ? data.chartData.length : "N/A"}
+          </div>
+        </div>
+      );
     }
   };
 
-  // 날짜 변경 핸들러
-  const handleDateChange = (newStartDate, newEndDate) => {
-    setStartDate(newStartDate);
-    setEndDate(newEndDate);
-    console.log('Date range changed:', { start: newStartDate, end: newEndDate });
+  // 날짜 범위 변경 핸들러
+  const handleDateRangeChange = (newDateRange) => {
+    console.log("Date range changed:", newDateRange);
+    setDateRange(newDateRange);
   };
 
-  // Add Widget 버튼 클릭 (기존 로직 유지)
+  // 새로고침 핸들러
+  const handleRefresh = () => {
+    console.log("Refreshing dashboard");
+    reload();
+  };
+
+  // 복제 핸들러
+  const handleClone = async () => {
+    const result = await clone();
+    if (result.success) {
+      console.log("Dashboard cloned successfully");
+    }
+  };
+
+  // 위젯 관련 핸들러들 (커스텀 대시보드용)
   const handleAddWidget = () => {
     setAddWidgetModalOpen(true);
   };
 
-  // ← 새로 추가: 위젯 추가 완료 핸들러
   const handleWidgetAdded = (widgetId) => {
-    console.log('Widget added:', widgetId);
-    // TODO: 실제 위젯을 대시보드에 추가하는 API 호출
-    // 임시로 widgets 배열에 추가하는 예시:
-    const newWidget = {
-      id: widgetId,
-      name: `Widget ${widgetId}`,
-      type: 'chart'
-    };
-    setWidgets(prev => [...prev, newWidget]);
+    console.log("Widget added:", widgetId);
+    // TODO: 실제 위젯 추가 로직
   };
 
-  // 로딩 상태 (기존 로직 유지)
+  // 고정 대시보드용 다운로드 핸들러
+  const handleFixedWidgetDownload = async (widgetId) => {
+    console.log("Download fixed widget data:", widgetId);
+    // TODO: 실제 데이터 다운로드 로직
+  };
+
+  // 로딩 상태
   if (loading) {
     return (
       <div className={styles.container}>
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '40px', 
-          color: '#f8fafc',
-          fontSize: '1.1rem'
-        }}>
+        <div
+          style={{
+            textAlign: "center",
+            padding: "40px",
+            color: "#f8fafc",
+            fontSize: "1.1rem",
+          }}
+        >
           Loading dashboard...
+          {loadingStats.total > 0 && (
+            <div
+              style={{
+                marginTop: "10px",
+                fontSize: "0.875rem",
+                color: "#9ca3af",
+              }}
+            >
+              Widgets: {loadingStats.success}/{loadingStats.total} loaded
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
-  // 대시보드 정보가 없는 경우 (기존 로직 유지)
-  if (!dashboard) {
+  // 에러 상태
+  if (error) {
     return (
       <div className={styles.container}>
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '40px', 
-          color: '#ef4444',
-          fontSize: '1.1rem'
-        }}>
-          <h1>Dashboard not found</h1>
-          <p>The requested dashboard could not be loaded.</p>
-          <button 
-            onClick={() => navigate('/dashboards')}
+        <div
+          style={{
+            textAlign: "center",
+            padding: "40px",
+            color: "#ef4444",
+            fontSize: "1.1rem",
+          }}
+        >
+          <h1>Error loading dashboard</h1>
+          <p>{error}</p>
+          <button
+            onClick={() => navigate("/dashboards")}
             style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer'
+              marginTop: "20px",
+              padding: "10px 20px",
+              backgroundColor: "#3b82f6",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
             }}
           >
             Back to Dashboards
@@ -164,62 +215,179 @@ const DashboardDetail = () => {
     );
   }
 
+  // 대시보드 정보가 없는 경우
+  if (!dashboard) {
+    return (
+      <div className={styles.container}>
+        <div
+          style={{
+            textAlign: "center",
+            padding: "40px",
+            color: "#ef4444",
+            fontSize: "1.1rem",
+          }}
+        >
+          <h1>Dashboard not found</h1>
+          <p>The requested dashboard could not be loaded.</p>
+          <button
+            onClick={() => navigate("/dashboards")}
+            style={{
+              marginTop: "20px",
+              padding: "10px 20px",
+              backgroundColor: "#3b82f6",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+          >
+            Back to Dashboards
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isFixedDashboard = dashboard.owner === "LANGFUSE";
+  const { template } = templateInfo;
+
+  // 고정 대시보드 렌더링
+  if (isFixedDashboard && template) {
+    return (
+      <div className={styles.container}>
+        {/* 헤더 */}
+        <div className={styles.header}>
+          <div className={styles.titleGroup}>
+            <h1 className={styles.title}>{dashboard.name}</h1>
+            <span className={styles.maintainedBadge}>
+              (Langfuse Maintained)
+            </span>
+            <Info size={16} className={styles.infoIcon} />
+          </div>
+          <button className={styles.cloneButton} onClick={handleClone}>
+            <Download size={16} />
+            Clone
+          </button>
+        </div>
+
+        {/* Filter Bar */}
+        <div className={styles.filterBar}>
+          <DashboardFilterControls
+            dateRange={dateRange}
+            onDateChange={handleDateRangeChange}
+            onRefresh={handleRefresh}
+          />
+        </div>
+
+        {/* 고정 위젯 그리드 - 조건부 CSS 클래스 적용 */}
+        <div className={styles.mainContent}>
+          <div className={styles.fixedWidgetGrid}>
+            {template.widgets.map((widget, index) => {
+              console.log(`Widget ${index}:`, {
+                id: widget.id,
+                title: widget.title,
+                x: widget.x,
+                y: widget.y,
+                x_size: widget.x_size,
+                y_size: widget.y_size,
+                component: widget.component,
+              });
+
+              const data = widgetData[widget.id] || { isLoading: true };
+              console.log(`Widget ${widget.id} data:`, data);
+
+              return (
+                <div
+                  key={widget.id}
+                  className={`${styles.widgetContainer} ${
+                    widget.component === "TotalMetric"
+                      ? styles.metricWidget
+                      : widget.component === "BaseTimeSeriesChart"
+                      ? styles.timeSeriesWidget
+                      : widget.component === "TracesBarListChart"
+                      ? styles.barChartWidget
+                      : ""
+                  }`}
+                  style={{
+                    gridColumn: `${widget.x + 1} / span ${widget.x_size}`,
+                    gridRow: `${widget.y + 1} / span ${widget.y_size}`,
+                  }}
+                >
+                  <WidgetCard
+                    title={widget.title}
+                    subtitle={widget.description}
+                    widgetType="fixed"
+                    onDownload={() => handleFixedWidgetDownload(widget.id)}
+                  >
+                    {getChartComponent(widget, data)}
+                  </WidgetCard>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 디버그 정보 (개발 환경에서만) */}
+        {import.meta.env.DEV && (
+          <div
+            style={{
+              position: "fixed",
+              bottom: "10px",
+              right: "10px",
+              backgroundColor: "rgba(0,0,0,0.8)",
+              color: "white",
+              padding: "8px 12px",
+              borderRadius: "4px",
+              fontSize: "0.75rem",
+              fontFamily: "monospace",
+            }}
+          >
+            API Status: {loadingStats.success}✓ {loadingStats.failed}✗{" "}
+            {loadingStats.mock}📝
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 커스텀 대시보드 렌더링 (기존 로직 유지)
   return (
     <div className={styles.container}>
-      {/* Header - 기존 스타일 유지 */}
       <div className={styles.header}>
         <div className={styles.titleGroup}>
           <h1 className={styles.title}>{dashboard.name}</h1>
           <Info size={16} className={styles.infoIcon} />
         </div>
-        <button 
-          className={styles.addWidgetButton} 
-          onClick={handleAddWidget}
-        >
+        <button className={styles.addWidgetButton} onClick={handleAddWidget}>
           <Plus size={16} /> Add Widget
         </button>
       </div>
 
-      {/* Filter Bar - DashboardFilterControls로 교체 */}
       <div className={styles.filterBar}>
         <DashboardFilterControls
-          startDate={startDate}
-          endDate={endDate}
-          onDateChange={handleDateChange}
+          dateRange={dateRange}
+          onDateRangeChange={handleDateRangeChange}
           onRefresh={handleRefresh}
         />
-        
-        {/* 개발용 디버그 정보 (나중에 제거 가능) */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{ 
-            marginLeft: '16px', 
-            fontSize: '11px', 
-            color: '#64748b',
-            fontFamily: 'monospace'
-          }}>
-            Debug: {startDate.toLocaleDateString()} - {endDate.toLocaleDateString()}
-          </div>
-        )}
       </div>
 
-      {/* Main Content Area */}
       <div className={styles.mainContent}>
-        {/* 위젯이 있는 경우에만 표시 */}
-        {widgets.length > 0 && (
-          <div className={styles.widgetGrid}>
-            {widgets.map(widget => (
-              <div key={widget.id} className={styles.widget}>
-                {/* 위젯 카드들이 여기에 렌더링될 예정 */}
-                <div>Widget: {widget.name}</div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div
+          style={{
+            textAlign: "center",
+            padding: "60px 20px",
+            color: "#9ca3af",
+          }}
+        >
+          <h3 style={{ marginBottom: "8px", color: "#6b7280" }}>
+            Custom Dashboard
+          </h3>
+          <p>위젯팀 연동 대기 중...</p>
+        </div>
       </div>
 
-      {/* AddWidgetModal - 새로운 컴포넌트 사용 */}
       {isAddWidgetModalOpen && (
-        <AddWidgetModal 
+        <AddWidgetModal
           onClose={() => setAddWidgetModalOpen(false)}
           onAddWidget={handleWidgetAdded}
         />
