@@ -11,7 +11,7 @@ import { useDashboardDetail } from "./hooks/useDashboardDetail";
 
 // 차트 컴포넌트들 import
 import TotalMetric from "./components/charts/TotalMetric";
-import BaseTimeSeriesChart from "./components/charts/BaseTimeSeriesChart";
+import BarTimeSeriesChart from "./components/charts/BarTimeSeriesChart";
 import TracesBarListChart from "./components/charts/TracesBarListChart";
 import ModelCostTable from "./components/charts/ModelCostTable";
 
@@ -71,15 +71,15 @@ const DashboardDetail = () => {
     }
 
     // 실제 API가 적용된 컴포넌트만 렌더링
-    const REAL_API_COMPONENTS = ["TotalMetric", "BaseTimeSeriesChart", "TracesBarListChart"];
+    const REAL_API_COMPONENTS = ["TotalMetric", "BarTimeSeriesChart", "TracesBarListChart"];
 
     if (REAL_API_COMPONENTS.includes(widget.component)) {
       // 실제 컴포넌트 렌더링
       switch (widget.component) {
         case "TotalMetric":
           return <TotalMetric data={data} />;
-        case "BaseTimeSeriesChart":
-          return <BaseTimeSeriesChart data={data.chartData || []} />;
+        case "BarTimeSeriesChart":
+          return <BarTimeSeriesChart data={data.chartData || []} />;
           case "TracesBarListChart":
   return <TracesBarListChart data={data.chartData || []} />;
         default:

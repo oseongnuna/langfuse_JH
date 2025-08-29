@@ -1,144 +1,262 @@
-import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
+import React, { useState } from 'react';
+import WidgetCard from '../WidgetCard';
+import TotalMetric from './TotalMetric';
+import { compactNumberFormatter } from '../../utils/numbers';
+import NoDataOrLoading from './NoDataOrLoading';
 
-/**
- * TracesBarListChart - 수평 바 차트 컴포넌트
- * API 데이터: [{ name: string, value: number, percentage?: number }]
- */
-const TracesBarListChart = ({ 
-  data = [], 
-  isLoading = false, 
-  isEmpty = false, 
-  error = null,
-  maxItems = 10 
+// ExpandListButton 간단 구현 (임시)
+const ExpandListButton = ({ 
+  isExpanded, 
+  setExpanded, 
+  totalLength, 
+  maxLength, 
+  expandText 
 }) => {
-  // 기본 색상 팔레트
-  const colors = [
-    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
-    '#8b5cf6', '#06b6d4', '#f97316', '#84cc16'
-  ];
+  if (totalLength <= maxLength) return null;
 
-  // 로딩 상태
-  if (isLoading) {
-    return (
-      <div className="w-full h-64 flex items-center justify-center">
-        <div className="animate-pulse space-y-3 w-full">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center space-x-3">
-              <div className="w-20 h-4 bg-gray-200 rounded"></div>
-              <div className="flex-1 h-4 bg-gray-200 rounded"></div>
-              <div className="w-12 h-4 bg-gray-200 rounded"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  return (
+    <button
+      onClick={() => setExpanded(!isExpanded)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        padding: '8px 16px',
+        marginTop: '12px',
+        border: '1px solid #d1d5db',
+        backgroundColor: 'white',
+        color: '#374151',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: '500',
+        transition: 'all 0.2s'
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.backgroundColor = '#f9fafb';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.backgroundColor = 'white';
+      }}
+    >
+      {isExpanded ? 'Show less' : expandText}
+      <span style={{ 
+        marginLeft: '4px',
+        transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+        transition: 'transform 0.2s'
+      }}>
+        ▼
+      </span>
+    </button>
+  );
+};
 
-  // 에러 상태
-  if (error) {
-    return (
-      <div className="w-full h-64 flex items-center justify-center">
-        <div className="text-center text-gray-500">
-          <p className="text-sm">차트를 로드할 수 없습니다</p>
-          <p className="text-xs text-gray-400 mt-1">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 빈 데이터 상태
-  if (isEmpty || !Array.isArray(data) || data.length === 0) {
-    return (
-      <div className="w-full h-64 flex items-center justify-center">
-        <div className="text-center text-gray-500">
-          <p className="text-sm">표시할 데이터가 없습니다</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 데이터 처리
-  const processedData = data
-    .filter(item => item && item.name && typeof item.value === 'number')
-    .sort((a, b) => b.value - a.value)
-    .slice(0, maxItems)
-    .map((item, index) => ({
-      name: item.name.length > 20 ? item.name.substring(0, 17) + '...' : item.name,
-      value: item.value,
-      percentage: item.percentage,
-      color: colors[index % colors.length]
-    }));
-
-  if (processedData.length === 0) {
-    return (
-      <div className="w-full h-64 flex items-center justify-center">
-        <div className="text-center text-gray-500">
-          <p className="text-sm">유효한 데이터가 없습니다</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 숫자 포맷팅
-  const formatValue = (value) => {
-    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-    return value.toString();
+// BarList 컴포넌트 (Tremor 대체)
+const BarList = ({ data, valueFormatter, showAnimation = true, color = "indigo" }) => {
+  const maxValue = Math.max(...data.map(item => item.value));
+  
+  const getBarColor = (colorName) => {
+    const colors = {
+      indigo: '#6366f1',
+      blue: '#3b82f6',
+      green: '#10b981',
+      purple: '#8b5cf6',
+      red: '#ef4444'
+    };
+    return colors[colorName] || colors.indigo;
   };
 
   return (
-    <div className="w-full h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={processedData}
-          layout="horizontal"
-          margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
-        >
-          <XAxis 
-            type="number" 
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 12, fill: '#6b7280' }}
-            tickFormatter={formatValue}
-          />
-          <YAxis 
-            type="category" 
-            dataKey="name"
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 12, fill: '#374151' }}
-            width={100}
-          />
-          <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-            {processedData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-      
-      {/* 데이터 리스트 (차트 하단) */}
-      <div className="mt-4 space-y-2 max-h-32 overflow-y-auto">
-        {processedData.slice(0, 5).map((item, index) => (
-          <div key={index} className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-2">
-              <div 
-                className="w-3 h-3 rounded-full" 
-                style={{ backgroundColor: item.color }}
-              />
-              <span className="text-gray-700">{item.name}</span>
+    <div style={{ marginTop: '24px' }}>
+      {data.map((item, index) => {
+        const percentage = maxValue > 0 ? (item.value / maxValue) * 100 : 0;
+        
+        return (
+          <div 
+            key={index}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: '8px',
+              padding: '4px 0'
+            }}
+          >
+            {/* 이름 */}
+            <div style={{
+              minWidth: '120px',
+              fontSize: '14px',
+              color: '#374151',
+              fontWeight: '500',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>
+              {item.name}
             </div>
-            <div className="flex items-center space-x-3">
-              <span className="font-medium">{formatValue(item.value)}</span>
-              {item.percentage && (
-                <span className="text-gray-500">{item.percentage}%</span>
-              )}
+            
+            {/* 바 컨테이너 */}
+            <div style={{
+              flex: 1,
+              margin: '0 12px',
+              height: '20px',
+              backgroundColor: '#f3f4f6',
+              borderRadius: '4px',
+              overflow: 'hidden',
+              position: 'relative'
+            }}>
+              {/* 실제 바 */}
+              <div
+                style={{
+                  width: `${percentage}%`,
+                  height: '100%',
+                  backgroundColor: getBarColor(color),
+                  borderRadius: '4px',
+                  transition: showAnimation ? 'width 0.8s ease-out' : 'none',
+                  opacity: 0.8
+                }}
+              />
+            </div>
+            
+            {/* 값 */}
+            <div style={{
+              minWidth: '60px',
+              textAlign: 'right',
+              fontSize: '14px',
+              color: '#6b7280',
+              fontWeight: '500'
+            }}>
+              {valueFormatter ? valueFormatter(item.value) : item.value}
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
+  );
+};
+
+/**
+ * 트레이스 바 리스트 차트 컴포넌트
+ * 트레이스 이름별 개수를 바 차트로 표시
+ * @param {Object} props
+ * @param {string} props.className - CSS 클래스
+ * @param {string} props.projectId - 프로젝트 ID
+ * @param {Object} props.globalFilterState - 글로벌 필터 상태
+ * @param {Date} props.fromTimestamp - 시작 시간
+ * @param {Date} props.toTimestamp - 종료 시간
+ * @param {boolean} props.isLoading - 로딩 상태
+ */
+const TracesBarListChart = ({
+  className,
+  projectId,
+  globalFilterState,
+  fromTimestamp,
+  toTimestamp,
+  isLoading = false,
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // TODO: 실제 API 연동 필요
+  console.log('TracesBarListChart props:', {
+    projectId,
+    globalFilterState,
+    fromTimestamp: fromTimestamp?.toISOString(),
+    toTimestamp: toTimestamp?.toISOString(),
+    isLoading
+  });
+
+  // Mock 총 트레이스 데이터
+  const mockTotalTraces = {
+    isLoading: false,
+    data: [{ count_count: 15847 }]
+  };
+
+  // Mock 트레이스 이름별 데이터
+  const mockTracesData = [
+    { name: 'chat-completion', count_count: 5234 },
+    { name: 'document-analysis', count_count: 3421 },
+    { name: 'code-generation', count_count: 2156 },
+    { name: 'text-summarization', count_count: 1789 },
+    { name: 'question-answering', count_count: 1234 },
+    { name: 'translation', count_count: 987 },
+    { name: 'sentiment-analysis', count_count: 654 },
+    { name: 'content-moderation', count_count: 432 },
+    { name: 'image-captioning', count_count: 321 },
+    { name: 'speech-to-text', count_count: 234 },
+    { name: 'text-to-speech', count_count: 187 },
+    { name: 'recommendation', count_count: 156 },
+    { name: 'classification', count_count: 123 },
+    { name: 'entity-extraction', count_count: 89 },
+    { name: 'keyword-extraction', count_count: 67 }
+  ];
+
+  const mockTraces = {
+    isLoading: false,
+    data: mockTracesData
+  };
+
+  const totalTraces = mockTotalTraces;
+  const traces = mockTraces;
+
+  // 데이터 변환
+  const transformedTraces = traces.data?.map((item) => {
+    return {
+      name: item.name ? item.name : "Unknown",
+      value: Number(item.count_count),
+    };
+  }) ?? [];
+
+  const maxNumberOfEntries = { collapsed: 5, expanded: 20 };
+
+  const adjustedData = isExpanded
+    ? transformedTraces.slice(0, maxNumberOfEntries.expanded)
+    : transformedTraces.slice(0, maxNumberOfEntries.collapsed);
+
+  return (
+    <WidgetCard
+      className={className}
+      title="Traces"
+      description={null}
+      isLoading={isLoading || traces.isLoading || totalTraces.isLoading}
+    >
+      <>
+        <TotalMetric
+          metric={compactNumberFormatter(
+            totalTraces.data?.[0]?.count_count
+              ? Number(totalTraces.data[0].count_count)
+              : 0,
+          )}
+          description="Total traces tracked"
+        />
+        {adjustedData.length > 0 ? (
+          <BarList
+            data={adjustedData}
+            valueFormatter={(number) =>
+              Intl.NumberFormat("en-US").format(number).toString()
+            }
+            showAnimation={true}
+            color="indigo"
+          />
+        ) : (
+          <NoDataOrLoading
+            isLoading={isLoading || traces.isLoading || totalTraces.isLoading}
+            description="Traces contain details about LLM applications and can be created using the SDK."
+            href="https://langfuse.com/docs/get-started"
+          />
+        )}
+        <ExpandListButton
+          isExpanded={isExpanded}
+          setExpanded={setIsExpanded}
+          totalLength={transformedTraces.length}
+          maxLength={maxNumberOfEntries.collapsed}
+          expandText={
+            transformedTraces.length > maxNumberOfEntries.expanded
+              ? `Show top ${maxNumberOfEntries.expanded}`
+              : "Show all"
+          }
+        />
+      </>
+    </WidgetCard>
   );
 };
 
