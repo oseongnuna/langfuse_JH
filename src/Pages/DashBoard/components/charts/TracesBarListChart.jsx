@@ -137,74 +137,84 @@ const BarList = ({ data, valueFormatter, showAnimation = true, color = "indigo" 
 
 /**
  * 트레이스 바 리스트 차트 컴포넌트
- * 트레이스 이름별 개수를 바 차트로 표시
+ * DashboardDetail에서 data prop으로 차트 데이터를 받음
  * @param {Object} props
- * @param {string} props.className - CSS 클래스
- * @param {string} props.projectId - 프로젝트 ID
- * @param {Object} props.globalFilterState - 글로벌 필터 상태
- * @param {Date} props.fromTimestamp - 시작 시간
- * @param {Date} props.toTimestamp - 종료 시간
- * @param {boolean} props.isLoading - 로딩 상태
+ * @param {Array} props.data - 차트 데이터 배열 (transformWidgetData에서 변환된 데이터)
  */
-const TracesBarListChart = ({
-  className,
-  projectId,
-  globalFilterState,
-  fromTimestamp,
-  toTimestamp,
-  isLoading = false,
-}) => {
+const TracesBarListChart = ({ data = [] }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // TODO: 실제 API 연동 필요
-  console.log('TracesBarListChart props:', {
-    projectId,
-    globalFilterState,
-    fromTimestamp: fromTimestamp?.toISOString(),
-    toTimestamp: toTimestamp?.toISOString(),
-    isLoading
+  // 디버깅용 로그 추가
+  console.log('=== TracesBarListChart Debug ===');
+  console.log('Raw data received:', data);
+  console.log('Data type:', typeof data);
+  console.log('Is array:', Array.isArray(data));
+  console.log('Data length:', data?.length);
+  
+  // 각 데이터 아이템 상세 분석
+  if (Array.isArray(data) && data.length > 0) {
+    data.forEach((item, index) => {
+      console.log(`Item ${index}:`, item);
+      console.log(`  - Keys: ${Object.keys(item)}`);
+      console.log(`  - Values: ${Object.values(item)}`);
+    });
+  }
+
+  // 데이터가 없거나 비어있는 경우
+  if (!data || data.length === 0) {
+    return (
+      <NoDataOrLoading
+        isLoading={false}
+        description="Traces contain details about LLM applications and can be created using the SDK."
+        href="https://langfuse.com/docs/get-started"
+      />
+    );
+  }
+
+  // 데이터 변환 (모든 가능한 키 확인)
+  const transformedTraces = data.map((item, index) => {
+    console.log(`Transforming item ${index}:`, item);
+    
+    // 가능한 모든 name 필드 확인
+    const name = item.name || 
+                 item.trace_name || 
+                 item.traceName || 
+                 item.key || 
+                 item.label ||
+                 item.dimension ||
+                 `Trace ${index + 1}`;
+    
+    // 가능한 모든 value 필드 확인
+    const rawValue = item.value || 
+                     item.count || 
+                     item.count_count || 
+                     item.metric || 
+                     item.total ||
+                     item.sum || 
+                     0;
+    
+    console.log(`  - Raw name: "${name}"`);
+    console.log(`  - Raw value: "${rawValue}"`);
+    
+    // 값을 숫자로 변환
+    const value = Number(rawValue);
+    console.log(`  - Parsed value: ${value} (isNaN: ${isNaN(value)})`);
+    
+    return {
+      name: String(name),
+      value: isNaN(value) ? 0 : value
+    };
   });
 
-  // Mock 총 트레이스 데이터
-  const mockTotalTraces = {
-    isLoading: false,
-    data: [{ count_count: 15847 }]
-  };
+  console.log('Transformed traces:', transformedTraces);
 
-  // Mock 트레이스 이름별 데이터
-  const mockTracesData = [
-    { name: 'chat-completion', count_count: 5234 },
-    { name: 'document-analysis', count_count: 3421 },
-    { name: 'code-generation', count_count: 2156 },
-    { name: 'text-summarization', count_count: 1789 },
-    { name: 'question-answering', count_count: 1234 },
-    { name: 'translation', count_count: 987 },
-    { name: 'sentiment-analysis', count_count: 654 },
-    { name: 'content-moderation', count_count: 432 },
-    { name: 'image-captioning', count_count: 321 },
-    { name: 'speech-to-text', count_count: 234 },
-    { name: 'text-to-speech', count_count: 187 },
-    { name: 'recommendation', count_count: 156 },
-    { name: 'classification', count_count: 123 },
-    { name: 'entity-extraction', count_count: 89 },
-    { name: 'keyword-extraction', count_count: 67 }
-  ];
-
-  const mockTraces = {
-    isLoading: false,
-    data: mockTracesData
-  };
-
-  const totalTraces = mockTotalTraces;
-  const traces = mockTraces;
-
-  // 데이터 변환
-  const transformedTraces = traces.data?.map((item) => {
-    return {
-      name: item.name ? item.name : "Unknown",
-      value: Number(item.count_count),
-    };
-  }) ?? [];
+  // 총합 계산
+  const totalCount = transformedTraces.reduce((sum, item) => {
+    const validValue = isNaN(item.value) ? 0 : item.value;
+    return sum + validValue;
+  }, 0);
+  
+  console.log('Total count:', totalCount);
 
   const maxNumberOfEntries = { collapsed: 5, expanded: 20 };
 
@@ -212,51 +222,50 @@ const TracesBarListChart = ({
     ? transformedTraces.slice(0, maxNumberOfEntries.expanded)
     : transformedTraces.slice(0, maxNumberOfEntries.collapsed);
 
+  // compactNumberFormatter 안전 호출
+  let formattedTotal;
+  try {
+    formattedTotal = compactNumberFormatter ? compactNumberFormatter(totalCount) : totalCount.toLocaleString();
+    console.log('Formatted total:', formattedTotal);
+  } catch (error) {
+    console.error('compactNumberFormatter error:', error);
+    formattedTotal = totalCount.toLocaleString();
+  }
+
   return (
-    <WidgetCard
-      className={className}
-      title="Traces"
-      description={null}
-      isLoading={isLoading || traces.isLoading || totalTraces.isLoading}
-    >
-      <>
-        <TotalMetric
-          metric={compactNumberFormatter(
-            totalTraces.data?.[0]?.count_count
-              ? Number(totalTraces.data[0].count_count)
-              : 0,
-          )}
-          description="Total traces tracked"
-        />
-        {adjustedData.length > 0 ? (
-          <BarList
-            data={adjustedData}
-            valueFormatter={(number) =>
-              Intl.NumberFormat("en-US").format(number).toString()
-            }
-            showAnimation={true}
-            color="indigo"
-          />
-        ) : (
-          <NoDataOrLoading
-            isLoading={isLoading || traces.isLoading || totalTraces.isLoading}
-            description="Traces contain details about LLM applications and can be created using the SDK."
-            href="https://langfuse.com/docs/get-started"
-          />
-        )}
-        <ExpandListButton
-          isExpanded={isExpanded}
-          setExpanded={setIsExpanded}
-          totalLength={transformedTraces.length}
-          maxLength={maxNumberOfEntries.collapsed}
-          expandText={
-            transformedTraces.length > maxNumberOfEntries.expanded
-              ? `Show top ${maxNumberOfEntries.expanded}`
-              : "Show all"
+    <>
+      <TotalMetric
+        metric={formattedTotal}
+        description="Total traces tracked"
+      />
+      {adjustedData.length > 0 ? (
+        <BarList
+          data={adjustedData}
+          valueFormatter={(number) =>
+            Intl.NumberFormat("en-US").format(number).toString()
           }
+          showAnimation={true}
+          color="indigo"
         />
-      </>
-    </WidgetCard>
+      ) : (
+        <NoDataOrLoading
+          isLoading={false}
+          description="Traces contain details about LLM applications and can be created using the SDK."
+          href="https://langfuse.com/docs/get-started"
+        />
+      )}
+      <ExpandListButton
+        isExpanded={isExpanded}
+        setExpanded={setIsExpanded}
+        totalLength={transformedTraces.length}
+        maxLength={maxNumberOfEntries.collapsed}
+        expandText={
+          transformedTraces.length > maxNumberOfEntries.expanded
+            ? `Show top ${maxNumberOfEntries.expanded}`
+            : "Show all"
+        }
+      />
+    </>
   );
 };
 

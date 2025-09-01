@@ -71,17 +71,29 @@ const DashboardDetail = () => {
     }
 
     // 실제 API가 적용된 컴포넌트만 렌더링
-    const REAL_API_COMPONENTS = ["TotalMetric", "BarTimeSeriesChart", "TracesBarListChart"];
+    const REAL_API_COMPONENTS = [
+      "TotalMetric",
+      "BarTimeSeriesChart",
+      "TracesBarListChart",
+    ];
 
     if (REAL_API_COMPONENTS.includes(widget.component)) {
       // 실제 컴포넌트 렌더링
       switch (widget.component) {
         case "TotalMetric":
           return <TotalMetric data={data} />;
-        case "BarTimeSeriesChart":
-          return <BarTimeSeriesChart data={data.chartData || []} />;
-          case "TracesBarListChart":
-  return <TracesBarListChart data={data.chartData || []} />;
+        case "BarTimeSeriesChart": {
+          const yLabel = /numeric/i.test(widget.title)
+            ? "numeric"
+            : /categorical/i.test(widget.title)
+            ? "categorical"
+            : "count";
+          return (
+            <BarTimeSeriesChart data={data.chartData || []} yLabel={yLabel} />
+          );
+        }
+        case "TracesBarListChart":
+          return <TracesBarListChart data={data.chartData || []} />;
         default:
           return null;
       }
@@ -302,7 +314,7 @@ const DashboardDetail = () => {
                   className={`${styles.widgetContainer} ${
                     widget.component === "TotalMetric"
                       ? styles.metricWidget
-                      : widget.component === "BaseTimeSeriesChart"
+                      : widget.component === "BarTimeSeriesChart"
                       ? styles.timeSeriesWidget
                       : widget.component === "TracesBarListChart"
                       ? styles.barChartWidget

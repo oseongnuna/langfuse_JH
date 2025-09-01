@@ -1,5 +1,5 @@
 // src/features/dashboard/components/templates/DashboardTemplates.js
-// 대시보드별 위젯 설정 및 템플릿 정의
+// 대시보드별 위젯 설정 및 템플릿 정의 (원본 Langfuse 레이아웃 유지)
 
 export const DASHBOARD_TEMPLATES = {
   // Usage Management Dashboard
@@ -8,13 +8,13 @@ export const DASHBOARD_TEMPLATES = {
     description: 'Track usage metrics across traces, observations, and scores to manage resource allocation.',
     layout: 'grid',
     widgets: [
-      // Row 1: 4 BIG_NUMBER widgets
+      // Row 1: 4 NUMBER widgets (원본과 동일한 위치)
       { 
         id: 'trace-count', 
         component: 'TotalMetric', 
         title: 'Total Trace Count', 
         description: 'Total count of traces across all environments',
-        x: 0, y: 0, x_size: 3, y_size: 2,
+        x: 0, y: 0, x_size: 3, y_size: 3,  // 원본: y_size: 3
         queryType: 'count',
         target: 'traces'
       },
@@ -23,7 +23,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'TotalMetric', 
         title: 'Total Observation Count', 
         description: 'Total count of observations across all environments',
-        x: 3, y: 0, x_size: 3, y_size: 2,
+        x: 3, y: 0, x_size: 3, y_size: 3,  // 원본: y_size: 3
         queryType: 'count',
         target: 'observations'
       },
@@ -32,7 +32,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'TotalMetric', 
         title: 'Total Score Count (numeric)', 
         description: 'Total count of numeric scores across all environments',
-        x: 6, y: 0, x_size: 3, y_size: 2,
+        x: 6, y: 0, x_size: 3, y_size: 3,  // 원본: y_size: 3
         queryType: 'count',
         target: 'scores-numeric'
       },
@@ -41,18 +41,18 @@ export const DASHBOARD_TEMPLATES = {
         component: 'TotalMetric', 
         title: 'Total Score Count (categorical)', 
         description: 'Total count of categorical scores across all environments',
-        x: 9, y: 0, x_size: 3, y_size: 2,
+        x: 9, y: 0, x_size: 3, y_size: 3,  // 원본: y_size: 3
         queryType: 'count',
         target: 'scores-categorical'
       },
       
-      // Row 2: 4 BAR_CHART widgets (time series)
+      // Row 2: 4 BAR_TIME_SERIES widgets (원본과 동일한 위치)
       { 
         id: 'trace-time', 
         component: 'BarTimeSeriesChart', 
         title: 'Total Trace Count (over time)', 
         description: 'Trend of trace count over time',
-        x: 0, y: 2, x_size: 3, y_size: 3,
+        x: 0, y: 3, x_size: 3, y_size: 5,  // 원본: y: 3, y_size: 5
         queryType: 'timeseries',
         target: 'traces'
       },
@@ -61,7 +61,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'BarTimeSeriesChart', 
         title: 'Total Observation Count (over time)', 
         description: 'Trend of observation count over time',
-        x: 3, y: 2, x_size: 3, y_size: 3,
+        x: 3, y: 3, x_size: 3, y_size: 5,  // 원본: y: 3, y_size: 5
         queryType: 'timeseries',
         target: 'observations'
       },
@@ -70,7 +70,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'BarTimeSeriesChart', 
         title: 'Total Score Count (numeric)', 
         description: 'Trend of numeric score count over time',
-        x: 6, y: 2, x_size: 3, y_size: 3,
+        x: 6, y: 3, x_size: 3, y_size: 5,  // 원본: y: 3, y_size: 5
         queryType: 'timeseries',
         target: 'scores-numeric'
       },
@@ -79,18 +79,18 @@ export const DASHBOARD_TEMPLATES = {
         component: 'BarTimeSeriesChart', 
         title: 'Total Score Count (categorical)', 
         description: 'Trend of categorical score count over time',
-        x: 9, y: 2, x_size: 3, y_size: 3,
+        x: 9, y: 3, x_size: 3, y_size: 5,  // 원본: y: 3, y_size: 5
         queryType: 'timeseries',
         target: 'scores-categorical'
       },
       
-      // Row 3: 2 STACKED_BAR_CHART widgets
+      // Row 3: 2 BAR_TIME_SERIES widgets (원본과 동일한 위치)
       { 
         id: 'trace-env', 
         component: 'TracesBarListChart', 
         title: 'Total Trace Count (by env)', 
         description: 'Distribution of trace count across different environments',
-        x: 0, y: 5, x_size: 6, y_size: 3,
+        x: 0, y: 8, x_size: 6, y_size: 5,  // 원본: y: 8, y_size: 5
         queryType: 'group-by',
         target: 'traces',
         groupBy: 'environment'
@@ -100,7 +100,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'TracesBarListChart', 
         title: 'Total Observation Count (by env)', 
         description: 'Distribution of observation count across different environments',
-        x: 6, y: 5, x_size: 6, y_size: 3,
+        x: 6, y: 8, x_size: 6, y_size: 5,  // 원본: y: 8, y_size: 5
         queryType: 'group-by',
         target: 'observations',
         groupBy: 'environment'
@@ -114,13 +114,13 @@ export const DASHBOARD_TEMPLATES = {
     description: 'Review your LLM costs.',
     layout: 'grid',
     widgets: [
-      // Row 1
+      // Row 1: 원본과 동일한 위치
       { 
         id: 'trace-count', 
         component: 'TotalMetric', 
         title: 'Total Count Traces', 
         description: 'Shows the count of Traces',
-        x: 0, y: 0, x_size: 3, y_size: 2,
+        x: 0, y: 0, x_size: 2, y_size: 2,  // 원본과 동일
         queryType: 'count',
         target: 'traces'
       },
@@ -129,7 +129,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'TotalMetric', 
         title: 'Total Count Observations', 
         description: 'Shows the count of Observations',
-        x: 3, y: 0, x_size: 3, y_size: 2,
+        x: 2, y: 0, x_size: 2, y_size: 2,  // 원본과 동일
         queryType: 'count',
         target: 'observations'
       },
@@ -138,7 +138,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'ModelCostTable', 
         title: 'Cost by Model Name', 
         description: 'Total cost broken down by model name',
-        x: 6, y: 0, x_size: 3, y_size: 2,
+        x: 4, y: 0, x_size: 4, y_size: 5,  // 원본과 동일
         queryType: 'group-by',
         target: 'observations',
         groupBy: 'model',
@@ -149,7 +149,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'UserChart', 
         title: 'Cost by Environment', 
         description: 'Total cost broken down by trace environment',
-        x: 9, y: 0, x_size: 3, y_size: 2,
+        x: 8, y: 0, x_size: 4, y_size: 5,  // 원본과 동일
         queryType: 'group-by',
         target: 'traces',
         groupBy: 'environment',
@@ -163,7 +163,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'BarTimeSeriesChart', 
         title: 'Total costs', 
         description: 'Total cost across all use cases',
-        x: 0, y: 2, x_size: 4, y_size: 3,
+        x: 0, y: 2, x_size: 4, y_size: 3,  // 원본과 동일
         queryType: 'timeseries',
         target: 'observations',
         metric: 'cost'
@@ -173,7 +173,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'TracesBarListChart', 
         title: 'Top 20 Users by Cost', 
         description: 'Aggregated model cost (observations.totalCost) by trace.userId',
-        x: 4, y: 2, x_size: 4, y_size: 3,
+        x: 0, y: 5, x_size: 4, y_size: 6,  // 원본과 동일
         queryType: 'top-n',
         target: 'traces',
         groupBy: 'userId',
@@ -185,7 +185,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'TracesBarListChart', 
         title: 'Top 20 Use Cases (Trace) by Cost', 
         description: 'Aggregated model cost (observations.totalCost) by trace.name',
-        x: 8, y: 2, x_size: 4, y_size: 3,
+        x: 4, y: 5, x_size: 4, y_size: 6,  // 원본과 동일
         queryType: 'top-n',
         target: 'traces',
         groupBy: 'name',
@@ -199,7 +199,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'TracesBarListChart', 
         title: 'Top 20 Use Cases (Observation) by Cost', 
         description: 'Aggregated model cost (observations.totalCost) by observation.name',
-        x: 0, y: 5, x_size: 4, y_size: 3,
+        x: 8, y: 5, x_size: 4, y_size: 6,  // 원본과 동일
         queryType: 'top-n',
         target: 'observations',
         groupBy: 'name',
@@ -211,7 +211,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'BarTimeSeriesChart', 
         title: 'P 95 Cost per Trace', 
         description: '95th percentile of cost for each trace',
-        x: 4, y: 5, x_size: 4, y_size: 3,
+        x: 0, y: 11, x_size: 4, y_size: 5,  // 원본과 동일
         queryType: 'percentile-timeseries',
         target: 'traces',
         metric: 'cost',
@@ -222,10 +222,21 @@ export const DASHBOARD_TEMPLATES = {
         component: 'BarTimeSeriesChart', 
         title: 'P 95 Input Cost per Observation', 
         description: '95th percentile of input cost for each observation (llm call)',
-        x: 8, y: 5, x_size: 4, y_size: 3,
+        x: 4, y: 11, x_size: 4, y_size: 5,  // 원본과 동일
         queryType: 'percentile-timeseries',
         target: 'observations',
         metric: 'inputCost',
+        percentile: 95
+      },
+      { 
+        id: 'cost-output-p95', 
+        component: 'BarTimeSeriesChart', 
+        title: 'P 95 Output Cost per Observation', 
+        description: '95th percentile of output cost for each observation (llm call)',
+        x: 8, y: 11, x_size: 4, y_size: 5,  // 원본과 동일
+        queryType: 'percentile-timeseries',
+        target: 'observations',
+        metric: 'outputCost',
         percentile: 95
       }
     ]
@@ -237,13 +248,13 @@ export const DASHBOARD_TEMPLATES = {
     description: 'Monitor latency metrics across traces and generations for performance optimization.',
     layout: 'grid',
     widgets: [
-      // Row 1
+      // Row 1: 원본과 동일한 위치
       { 
         id: 'latency-use-case', 
         component: 'LatencyChart', 
         title: 'P 95 Latency by Use Case', 
         description: 'P95 latency metrics segmented by trace name',
-        x: 0, y: 0, x_size: 6, y_size: 3,
+        x: 0, y: 0, x_size: 6, y_size: 5,  // 원본과 동일
         queryType: 'percentile-group',
         target: 'traces',
         metric: 'latency',
@@ -255,7 +266,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'LatencyChart', 
         title: 'P 95 Latency by Level (Observations)', 
         description: 'P95 latency metrics for observations segmented by level',
-        x: 6, y: 0, x_size: 6, y_size: 3,
+        x: 6, y: 0, x_size: 6, y_size: 5,  // 원본과 동일
         queryType: 'percentile-group',
         target: 'observations',
         metric: 'latency',
@@ -263,13 +274,13 @@ export const DASHBOARD_TEMPLATES = {
         groupBy: 'level'
       },
       
-      // Row 2
+      // Row 2: 원본과 동일한 위치
       { 
         id: 'latency-users', 
         component: 'TracesBarListChart', 
         title: 'Max Latency by User Id (Traces)', 
         description: 'Maximum latency for the top 50 users by trace userId',
-        x: 0, y: 3, x_size: 6, y_size: 3,
+        x: 0, y: 5, x_size: 6, y_size: 5,  // 원본과 동일
         queryType: 'max-group',
         target: 'traces',
         metric: 'latency',
@@ -281,20 +292,20 @@ export const DASHBOARD_TEMPLATES = {
         component: 'ModelUsageChart', 
         title: 'Avg Time To First Token by Prompt Name (Observations)', 
         description: 'Average time to first token segmented by prompt name',
-        x: 6, y: 3, x_size: 6, y_size: 3,
+        x: 6, y: 5, x_size: 6, y_size: 5,  // 원본과 동일
         queryType: 'avg-group',
         target: 'observations',
         metric: 'timeToFirstToken',
         groupBy: 'promptName'
       },
       
-      // Row 3
+      // Row 3: 원본과 동일한 위치
       { 
         id: 'time-first-token-model', 
         component: 'BarTimeSeriesChart', 
         title: 'P 95 Time To First Token by Model', 
         description: 'P95 time to first token metrics segmented by model',
-        x: 0, y: 6, x_size: 4, y_size: 3,
+        x: 0, y: 10, x_size: 4, y_size: 5,  // 원본과 동일
         queryType: 'percentile-timeseries-group',
         target: 'observations',
         metric: 'timeToFirstToken',
@@ -306,7 +317,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'BarTimeSeriesChart', 
         title: 'P 95 Latency by Model', 
         description: 'P95 latency metrics for observations segmented by model',
-        x: 4, y: 6, x_size: 4, y_size: 3,
+        x: 4, y: 10, x_size: 4, y_size: 5,  // 원본과 동일
         queryType: 'percentile-timeseries-group',
         target: 'observations',
         metric: 'latency',
@@ -318,7 +329,7 @@ export const DASHBOARD_TEMPLATES = {
         component: 'BarTimeSeriesChart', 
         title: 'Avg Output Tokens Per Second by Model', 
         description: 'Average output tokens per second segmented by model',
-        x: 8, y: 6, x_size: 4, y_size: 3,
+        x: 8, y: 10, x_size: 4, y_size: 5,  // 원본과 동일
         queryType: 'avg-timeseries-group',
         target: 'observations',
         metric: 'tokensPerSecond',
@@ -330,14 +341,18 @@ export const DASHBOARD_TEMPLATES = {
 
 // 대시보드 ID 매핑 (실제 ID → 템플릿 키)
 export const DASHBOARD_ID_MAPPING = {
-  // TODO: 실제 Langfuse 대시보드 ID로 교체
-  'langfuse-usage-management': 'usage-management',
-  'langfuse-cost-dashboard': 'cost-dashboard', 
-  'langfuse-latency-dashboard': 'latency-dashboard'
+  'cmawln8k700xqad07000k1q8b': 'usage-management',  // 실제 Usage Management ID
+  'cmawoi7yd00aqad07f3why08w': 'cost-dashboard',    // 실제 Cost Dashboard ID
+  'cmawk4ywj00jmad072jn7s0ru': 'latency-dashboard'  // 실제 Latency Dashboard ID
 };
 
 // 템플릿 키 추출 함수
 export function getTemplateKey(dashboardData, dashboardId) {
+  // 실제 ID로 먼저 매칭
+  if (DASHBOARD_ID_MAPPING[dashboardId]) {
+    return DASHBOARD_ID_MAPPING[dashboardId];
+  }
+  
   // 대시보드 이름으로 매칭
   const name = dashboardData?.name?.toLowerCase() || '';
   
@@ -345,8 +360,7 @@ export function getTemplateKey(dashboardData, dashboardId) {
   if (name.includes('cost dashboard')) return 'cost-dashboard';  
   if (name.includes('latency dashboard')) return 'latency-dashboard';
   
-  // ID 기반 매핑도 시도
-  return DASHBOARD_ID_MAPPING[dashboardId] || null;
+  return null;
 }
 
 // 위젯별 쿼리 생성 함수 (executeQuery 파라미터 생성용)

@@ -1,11 +1,21 @@
-import { useState, useEffect } from 'react';
-import { dashboardAPI, widgetAPI, commonUtils } from '../services';
-import { getTemplateKey, DASHBOARD_TEMPLATES } from '../templates/DashboardTemplates';
-import { transformWidgetData, generateMockData } from '../utils/widget-data-transform';
-import { getDateRangeDays, getAggregationType, getChartConfigType } from '../utils/dashboard-helpers';
+import { useState, useEffect } from "react";
+import { dashboardAPI, widgetAPI, commonUtils } from "../services";
+import {
+  getTemplateKey,
+  DASHBOARD_TEMPLATES,
+} from "../templates/DashboardTemplates";
+import {
+  transformWidgetData,
+  generateMockData,
+} from "../utils/widget-data-transform";
+import {
+  getDateRangeDays,
+  getAggregationType,
+  getChartConfigType,
+} from "../utils/dashboard-helpers";
 
 // 실제 API를 적용할 컴포넌트 목록 (단계적 적용)
-const REAL_API_COMPONENTS = ["TotalMetric", "BaseTimeSeriesChart"];
+const REAL_API_COMPONENTS = ["TotalMetric", "BarTimeSeriesChart"];
 
 export const useDashboardDetail = (dashboardId) => {
   // 상태 관리
@@ -19,7 +29,11 @@ export const useDashboardDetail = (dashboardId) => {
   const loadWidgetData = async (widgets, filters = {}) => {
     if (!widgets || widgets.length === 0) return;
 
-    console.log("위젯 데이터 로딩 시작 (선택적 API 적용):", widgets.length, "개");
+    console.log(
+      "위젯 데이터 로딩 시작 (선택적 API 적용):",
+      widgets.length,
+      "개"
+    );
 
     const { fromTimestamp, toTimestamp } = commonUtils.getDateRange(
       getDateRangeDays(filters.dateRange || "Past 7 days")
@@ -74,6 +88,15 @@ export const useDashboardDetail = (dashboardId) => {
               console.log(`실제 API 데이터 수신 (${widget.id}):`, result.data);
 
               const transformedData = transformWidgetData(widget, result.data);
+
+              // 이 부분에 로그 추가 ⭐
+              console.log("=== Transform Debug ===");
+              console.log("Original API data:", result.data);
+              console.log("Transformed data:", transformedData);
+              console.log(
+                "transformedData.chartData:",
+                transformedData.chartData
+              );
 
               setWidgetData((prev) => ({
                 ...prev,
@@ -209,19 +232,25 @@ export const useDashboardDetail = (dashboardId) => {
   // 템플릿 정보 계산
   const getTemplateInfo = () => {
     if (!dashboard) return { templateKey: null, template: null };
-    
+
     const templateKey = getTemplateKey(dashboard, dashboardId);
     const template = templateKey ? DASHBOARD_TEMPLATES[templateKey] : null;
-    
+
     return { templateKey, template };
   };
 
   // 로딩 통계
   const getLoadingStats = () => {
     const total = Object.keys(widgetData).length;
-    const success = Object.values(widgetData).filter((w) => w.apiStatus === "success").length;
-    const failed = Object.values(widgetData).filter((w) => w.apiStatus === "failed").length;
-    const mock = Object.values(widgetData).filter((w) => w.apiStatus === "mock").length;
+    const success = Object.values(widgetData).filter(
+      (w) => w.apiStatus === "success"
+    ).length;
+    const failed = Object.values(widgetData).filter(
+      (w) => w.apiStatus === "failed"
+    ).length;
+    const mock = Object.values(widgetData).filter(
+      (w) => w.apiStatus === "mock"
+    ).length;
     const empty = Object.values(widgetData).filter((w) => w.isEmpty).length;
 
     return { total, success, failed, mock, empty };
@@ -231,7 +260,7 @@ export const useDashboardDetail = (dashboardId) => {
   useEffect(() => {
     if (dashboardId) {
       loadDashboardData();
-    }  
+    }
   }, [dashboardId]); // loadDashboardData는 의도적으로 제외 (무한 루프 방지)
 
   // 날짜 범위 변경 시 위젯 데이터 다시 로딩
@@ -252,20 +281,20 @@ export const useDashboardDetail = (dashboardId) => {
     loading,
     error,
     dateRange,
-    
+
     // 계산된 값들
     templateInfo: getTemplateInfo(),
     loadingStats: getLoadingStats(),
-    
+
     // 액션 함수들
     setDateRange,
     reload: loadDashboardData,
     clone: handleCloneDashboard,
-    
+
     // API 테스트용 (개발 환경에서만)
     ...(import.meta.env.DEV && {
-      _loadWidgetData: loadWidgetData,  // 직접 테스트용
-      _REAL_API_COMPONENTS: REAL_API_COMPONENTS
-    })
+      _loadWidgetData: loadWidgetData, // 직접 테스트용
+      _REAL_API_COMPONENTS: REAL_API_COMPONENTS,
+    }),
   };
 };

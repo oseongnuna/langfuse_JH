@@ -1,4 +1,469 @@
+/* ===== CHART CONTAINER & TOOLTIP STYLES ===== */
 .chartContainer {
-  width: 100%;
-  height: 100%;
-}
+    height: 100%;
+    width: 100%;
+    flex: 1;
+    justify-content: center;
+    font-size: 12px;
+  }
+  
+  .tooltip {
+    display: grid;
+    min-width: 8rem;
+    grid-template-rows: auto;
+    gap: 6px;
+    border-radius: 8px;
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    background-color: white;
+    padding: 10px;
+    font-size: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .tooltipGrid {
+    display: grid;
+    gap: 6px;
+  }
+  
+  .tooltipItem {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .tooltipItemCenter {
+    align-items: center;
+  }
+  
+  .tooltipIndicator {
+    flex-shrink: 0;
+    border-radius: 2px;
+    border: 1px solid;
+  }
+  
+  .tooltipIndicatorDot {
+    height: 10px;
+    width: 10px;
+  }
+  
+  .tooltipIndicatorLine {
+    width: 4px;
+    height: 100%;
+  }
+  
+  .tooltipIndicatorDashed {
+    width: 0;
+    border-width: 1.5px;
+    border-style: dashed;
+    background-color: transparent;
+    margin: 2px 0;
+  }
+  
+  .tooltipContent {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    line-height: 1;
+  }
+  
+  .tooltipContentEnd {
+    align-items: flex-end;
+  }
+  
+  .tooltipContentCenter {
+    align-items: center;
+  }
+  
+  .tooltipLabel {
+    font-weight: 500;
+  }
+  
+  .tooltipName {
+    color: #6b7280;
+  }
+  
+  .tooltipValue {
+    font-family: monospace;
+    font-weight: 500;
+    color: #111827;
+  }
+  
+  .tooltipGrid2 {
+    display: grid;
+    gap: 6px;
+  }
+  
+  /* ===== LEGEND STYLES ===== */
+  .legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  
+  .legendTop {
+    padding-bottom: 12px;
+  }
+  
+  .legendBottom {
+    padding-top: 12px;
+  }
+  
+  .legendItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .legendIcon {
+    height: 8px;
+    width: 8px;
+    flex-shrink: 0;
+    border-radius: 2px;
+  }
+  
+  /* ===== BIG NUMBER COMPONENT STYLES ===== */
+  .bigNumberContainer {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .numberDisplay {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+  }
+  
+  .mainNumber {
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+  
+  .unit {
+    font-weight: 700;
+    color: #6b7280; /* text-muted-foreground equivalent */
+  }
+  
+  /* Font size classes equivalent to Tailwind */
+  .textXs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  
+  .textSm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .textBase {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  
+  .textLg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  
+  .textXl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  
+  .textXl2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  .textXl3 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  .textXl4 {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+  
+  .textXl5 {
+    font-size: 3rem;
+    line-height: 1;
+  }
+  
+  .textXl6 {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+  
+  .textXl7 {
+    font-size: 4.5rem;
+    line-height: 1;
+  }
+  
+  .textXl8 {
+    font-size: 6rem;
+    line-height: 1;
+  }
+  
+  /* ===== DOWNLOAD BUTTON STYLES ===== */
+  .downloadButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280; /* text-muted-foreground equivalent */
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  .downloadButton:hover:not(:disabled) {
+    color: #111827; /* text-foreground equivalent */
+  }
+  
+  .downloadButton:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+  
+  .downloadButton:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+  
+  /* ===== PIE CHART STYLES ===== */
+  .pieCenterLabel {
+    fill: var(--foreground, #111827);
+    font-size: 1.875rem; /* text-3xl equivalent */
+    line-height: 2.25rem;
+    font-weight: 700;
+  }
+  
+  .pieCenterSubLabel {
+    fill: var(--muted-foreground, #6b7280);
+  }
+  
+  /* ===== BAR CHART STYLES ===== */
+  .horizontalBarFill {
+    fill: var(--color-metric);
+  }
+  
+  .verticalBarFill {
+    fill: var(--color-metric);
+  }
+  
+  /* ===== COMMON UTILITY STYLES ===== */
+  .noData {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280; /* text-muted-foreground equivalent */
+  }
+  
+  .loading {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-style: italic;
+  }
+  
+  .error {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: #dc2626; /* red color for errors */
+    font-weight: 500;
+  }
+
+ /* ===== PIVOT TABLE STYLES ===== */
+.container {
+    position: relative;
+    height: 100%;
+    overflow: auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .loadingOverlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  
+  .loadingContent {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  .spinner {
+    height: 1rem;
+    width: 1rem;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .table {
+    width: 100%;
+    table-layout: fixed;
+    caption-side: bottom;
+    border-spacing: 0;
+    overflow: auto;
+    font-size: 0.875rem;
+  }
+  
+  .tableHeader {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .tableRow {
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.2s ease;
+  }
+  
+  .tableRow:hover {
+    background-color: rgba(156, 163, 175, 0.3);
+  }
+  
+  .tableRowSubtotal {
+    background-color: rgba(156, 163, 175, 0.3);
+  }
+  
+  .tableRowTotal {
+    background-color: rgba(156, 163, 175, 0.5);
+  }
+  
+  .tableHead {
+    position: relative;
+    height: 2.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    padding: 0.25rem;
+    text-align: left;
+    vertical-align: middle;
+    font-weight: 500;
+    color: #6b7280;
+  }
+  
+  .tableHeadSortable {
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+  
+  .tableHeadSortable:hover .hoverIndicator {
+    opacity: 1;
+  }
+  
+  .tableCell {
+    padding: 0.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tableCellNumeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  .tableCellBold {
+    font-weight: 600;
+  }
+  
+  /* Indentation levels */
+  .indent1 {
+    padding-left: 1.5rem;
+  }
+  
+  .indent2 {
+    padding-left: 2.5rem;
+  }
+  
+  /* Header content */
+  .headerContent {
+    display: flex;
+    align-items: center;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+  
+  .headerContentRight {
+    justify-content: flex-end;
+  }
+  
+  .headerContentLeft {
+    justify-content: flex-start;
+  }
+  
+  .headerLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .sortIndicator {
+    margin-left: 0.25rem;
+  }
+  
+  .hoverIndicator {
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 0.375rem;
+    touch-action: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    background-color: #f3f4f6;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  
+  /* Empty state styles */
+  .emptyState {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .emptyStateContent {
+    text-align: center;
+  }
+  
+  .emptyStateText {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }

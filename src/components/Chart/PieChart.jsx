@@ -1,60 +1,96 @@
-// DonutChart.jsx
-import React from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-} from "recharts";
+import React, { useMemo } from "react";
+import { ChartContainer, ChartTooltip } from "./chart";
+import { Label, Pie, PieChart as PieChartComponent } from "recharts";
 import styles from "./Chart.module.css";
-import PropTypes from "prop-types";
 
-const COLORS = ["#60a5fa", "#34d399", "#facc15", "#fb923c", "#f87171"];
+/**
+ * PieChart component
+ * @param {Object} props - Component props
+ * @param {Array} props.data - Data to be displayed. Expects an array of objects with dimension and metric properties.
+ * @param {Object} props.config - Configuration object for the chart. Can include theme settings for light and dark modes.
+ * @param {boolean} props.accessibilityLayer - Boolean to enable or disable the accessibility layer. Default is true.
+ */
+export const PieChart = ({
+  data,
+  config = {
+    metric: {
+      theme: {
+        light: "hsl(var(--chart-1))",
+        dark: "hsl(var(--chart-1))",
+      },
+    },
+  },
+  accessibilityLayer = true,
+}) => {
+  // Calculate total metric value for center label
+  const totalValue = useMemo(() => {
+    return data.reduce((acc, curr) => acc + (curr.metric || 0), 0);
+  }, [data]);
 
-function DonutChart({ data = [], dataKey, nameKey }) {
-  if (!data || data.length === 0) {
-    return (
-      <div className={styles.chartContainer}>
-        <div className={styles.noData}>데이터가 없습니다</div>
-      </div>
-    );
-  }
+  // Transform data for PieChart
+  const chartData = useMemo(() => {
+    return data.map((item, index) => ({
+      name: item.dimension || "Unknown",
+      value: item.metric,
+      fill: `hsl(var(--chart-${(index % 4) + 1}))`,
+    }));
+  }, [data]);
 
   return (
-    <div className={styles.chartContainer}>
-      <ResponsiveContainer width="100%" height={400}>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={120}
-            paddingAngle={5}
-            dataKey={dataKey}
-            nameKey={nameKey}
-          >
-            {data.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
-              />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+    <ChartContainer config={config}>
+      <PieChartComponent accessibilityLayer={accessibilityLayer}>
+        <ChartTooltip
+          contentStyle={{ backgroundColor: "hsl(var(--background))" }}
+          itemStyle={{ color: "hsl(var(--foreground))" }}
+        />
+        <Pie
+          data={chartData}
+          dataKey="value"
+          nameKey="name"
+          cx="50%"
+          cy="50%"
+          innerRadius={80}
+          outerRadius={120}
+          paddingAngle={2}
+          strokeWidth={5}
+        >
+          {/* Label in the center of the donut */}
+          {data.length > 0 && (
+            <Label
+              content={({ viewBox }) => {
+                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  return (
+                    <text
+                      x={viewBox.cx}
+                      y={viewBox.cy}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      <tspan
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        className={styles.pieCenterLabel}
+                      >
+                        {totalValue.toLocaleString()}
+                      </tspan>
+                      <tspan
+                        x={viewBox.cx}
+                        y={(viewBox.cy || 0) + 24}
+                        className={styles.pieCenterSubLabel}
+                      >
+                        Total
+                      </tspan>
+                    </text>
+                  );
+                }
+                return null;
+              }}
+            />
+          )}
+        </Pie>
+      </PieChartComponent>
+    </ChartContainer>
   );
-}
-
-DonutChart.propTypes = {
-  data: PropTypes.array,
-  dataKey: PropTypes.string.isRequired,
-  nameKey: PropTypes.string.isRequired,
 };
 
-export default DonutChart;
+export default PieChart;

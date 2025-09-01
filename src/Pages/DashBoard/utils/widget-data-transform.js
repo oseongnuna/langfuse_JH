@@ -3,8 +3,8 @@ import { commonUtils } from '../services';
 // 실제 API 응답을 컴포넌트에 맞는 형태로 변환
 export const transformWidgetData = (widget, apiData) => {
   // 필수 로그만 유지
-  if (import.meta.env.DEV && widget.component === 'BaseTimeSeriesChart') {
-    console.log(`🔄 BaseTimeSeriesChart 변환 (${widget.id}):`, apiData);
+  if (import.meta.env.DEV && widget.component === 'BarTimeSeriesChart') {
+    console.log(`🔄 BarTimeSeriesChart 변환 (${widget.id}):`, apiData);
   }
 
   if (!Array.isArray(apiData) || apiData.length === 0) {
@@ -29,8 +29,8 @@ export const transformWidgetData = (widget, apiData) => {
       return { value };
     }
 
-    case "BaseTimeSeriesChart": {
-      // 시계열 데이터 변환 - BaseTimeSeriesChart가 기대하는 구조로
+    case "BarTimeSeriesChart": {
+      // 시계열 데이터 변환 - BarTimeSeriesChart가가 기대하는 구조로
       if (actualData.length > 0 && actualData[0] && actualData[0].time_dimension) {
         // 실제 시계열 데이터가 있는 경우
         const chartData = actualData.map((row) => {
@@ -80,7 +80,7 @@ export const transformWidgetData = (widget, apiData) => {
         // 4. 시간순으로 정렬
         chartData.sort((a, b) => a.ts - b.ts);
     
-        if (import.meta.env.DEV && widget.component === 'BaseTimeSeriesChart') {
+        if (import.meta.env.DEV && widget.component === 'BarTimeSeriesChart') {
           console.log(`✅ 시계열 변환 완료 (${widget.id}):`, {
             원본데이터: actualData.slice(0, 2),
             변환결과: chartData.slice(0, 2),
@@ -213,7 +213,7 @@ export const generateMockData = (widget) => {
         apiStatus: 'mock'
       };
 
-    case "BaseTimeSeriesChart":
+    case "BarTimeSeriesChart":
       return {
         chartData: Array.from({ length: 7 }, (_, i) => ({
           date: `8/${18 + i}/25`,
@@ -273,7 +273,7 @@ export const generateMockData = (widget) => {
   }
 };
 
-// 데이터 검증 함수 - BaseTimeSeriesChart 검증 수정
+// 데이터 검증 함수 - BarTimeSeriesChart  검증 수정
 export const validateComponentData = (component, data) => {
   // 로딩 중이거나 에러가 있으면 검증 통과
   if (data.isLoading || data.error) {
@@ -289,8 +289,8 @@ export const validateComponentData = (component, data) => {
     case 'TotalMetric':
       return typeof data.value === 'number' || data.value !== undefined;
     
-    case 'BaseTimeSeriesChart':
-      // BaseTimeSeriesChart의 경우 chartData 구조 검증
+    case 'BarTimeSeriesChart':
+      // BarTimeSeriesChart 경우 chartData 구조 검증
       return Array.isArray(data.chartData) && 
              data.chartData.length > 0 &&
              data.chartData.every(item => 
